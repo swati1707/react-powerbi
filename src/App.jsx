@@ -204,6 +204,18 @@ class App extends React.Component {
             });
         }
         else if (this.state.accessToken !== "" && this.state.embedUrl !== "" && this.state.embedToken !== "") {
+
+            const countryFilter = {
+                $schema: "http://powerbi.com/product/schema#basic",
+                target: {
+                  table: "Country",
+                  column: "country_name"
+                },
+                operator: "In",
+                values: [INDIA],
+                filterType: 1,
+                requireSingleSelection: false
+            }
             const embedConfiguration = {
                 type: "report",
                 tokenType: models.TokenType.Embed,
@@ -221,7 +233,11 @@ class App extends React.Component {
             report.off("loaded");
 
             report.on("loaded", function () {
-                console.log("Report load successful");
+               const existingFilters = report.getFilters()
+                .then(function(response) {
+                    const newFiltersArr = [...response, countryFilter];
+                    report.setFilters(newFiltersArr);
+                });
             });
 
             report.off("rendered");
